@@ -1,6 +1,7 @@
 #include <expression.hpp>
 
 #include <stdexcept>
+#include <cmath>
 
 //==================//
 // Класс Expression //
@@ -24,11 +25,31 @@ Expression& Expression::operator+=(const Expression &other) {
     return *this;
 }
 
+Expression Expression::operator-(const Expression &other) {
+    return Expression(std::make_shared<OperationSub>(*this, other));
+}
+
+Expression& Expression::operator-=(const Expression &other) {
+    *this = *this - other;
+
+    return *this;
+}
+
 Expression Expression::operator*(const Expression &other) {
     return Expression(std::make_shared<OperationMul>(*this, other));
 }
 
 Expression& Expression::operator*=(const Expression &other) {
+    *this = *this * other;
+
+    return *this;
+}
+
+Expression Expression::operator/(const Expression &other) {
+    return Expression(std::make_shared<OperationDiv>(*this, other));
+}
+
+Expression& Expression::operator/=(const Expression &other) {
     *this = *this * other;
 
     return *this;
@@ -123,6 +144,28 @@ std::string OperationAdd::to_string() const {
 }
 
 //====================//
+// Класс OperationSub //
+//====================//
+
+OperationSub::OperationSub(Expression left, Expression right) :
+    left_  (left),
+    right_ (right)
+{}
+
+Value_t OperationSub::eval(std::map<std::string, Value_t> context) const {
+    Value_t value_left  = left_.eval(context);
+    Value_t value_right = right_.eval(context);
+
+    return value_left - value_right;
+}
+
+std::string OperationSub::to_string() const {
+    return std::string("(")   + left_.to_string()  +
+           std::string(" - ") + right_.to_string() +
+           std::string(")");
+}
+
+//====================//
 // Класс OperationMul //
 //====================//
 
@@ -139,7 +182,57 @@ Value_t OperationMul::eval(std::map<std::string, Value_t> context) const {
 }
 
 std::string OperationMul::to_string() const {
-    return std::string("(")   + left_.to_string()  +
-           std::string(" * ") + right_.to_string() +
-           std::string(")");
+    return std::string("(")   + left_.to_string()  + std::string(")") +
+           std::string(" * ") +
+           std::string("(")   + right_.to_string() + std::string(")");
+}
+
+//====================//
+// Класс OperationDiv //
+//====================//
+
+OperationDiv::OperationDiv(Expression left, Expression right) :
+    left_  (left),
+    right_ (right)
+{}
+
+Value_t OperationDiv::eval(std::map<std::string, Value_t> context) const {
+    Value_t value_left  = left_.eval(context);
+    Value_t value_right = right_.eval(context);
+
+    return value_left / value_right;
+}
+
+std::string OperationDiv::to_string() const {
+return std::string("(")   + left_.to_string()  + std::string(")") +
+       std::string(" / ") +
+       std::string("(")   + right_.to_string() + std::string(")");
+}
+
+//====================//
+// Класс OperationPow //
+//====================//
+
+OperationPow::OperationPow(Expression left, Expression right) :
+    left_  (left),
+    right_ (right)
+{}
+
+Value_t OperationPow::eval(std::map<std::string, Value_t> context) const {
+    Value_t value_left  = left_.eval(context);
+    Value_t value_right = right_.eval(context);
+
+    try {
+        return powl(value_left, value_right);
+    } catch (const std::exception &e) {
+        throw std::runtime_error("Error in powl: " + std::string(e.what())       +
+                                 " (Left: "        + std::to_string(value_left)  +
+                                 ", Right: "       + std::to_string(value_right) + ")");
+    }
+}
+
+std::string OperationPow::to_string() const {
+    return std::string("(")   + left_.to_string()  + std::string(")") +
+           std::string(" ^ ") +
+           std::string("(")   + right_.to_string() + std::string(")");
 }

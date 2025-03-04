@@ -35,9 +35,15 @@ public:
 
     // Конструирование выражений на основе других выражений.
     Expression  operator+ (const Expression &other);
+    Expression  operator- (const Expression &other);
     Expression  operator* (const Expression &other);
+    Expression  operator/ (const Expression &other);
+    Expression  operator^ (const Expression &other);
     Expression& operator*=(const Expression &other);
+    Expression& operator-=(const Expression &other);
     Expression& operator+=(const Expression &other);
+    Expression& operator/=(const Expression &other);
+    Expression& operator^=(const Expression &other);
 
     // Операции с выражениями.
     Value_t eval(std::map<std::string, Value_t> context) const;
@@ -102,6 +108,23 @@ private:
     Expression right_;
 };
 
+// Класс, представляющий выражение вычитания двух выражений.
+class OperationSub : public ExpressionImpl {
+public:
+    // Создание выражения для суммы на основе подвыражений.
+    OperationSub(Expression left, Expression right);
+
+    virtual ~OperationSub() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression left_;
+    Expression right_;
+};
+
 // Класс, представляющий выражение умножения двух выражений.
 class OperationMul : public ExpressionImpl {
 public:
@@ -109,6 +132,40 @@ public:
     OperationMul(Expression left, Expression right);
 
     virtual ~OperationMul() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression left_;
+    Expression right_;
+};
+
+// Класс, представляющий выражение деления двух выражений.
+class OperationDiv : public ExpressionImpl {
+public:
+    // Создание выражения для деления на основе подвыражений.
+    OperationDiv(Expression left, Expression right);
+
+    virtual ~OperationDiv() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression left_;
+    Expression right_;
+};
+
+// Класс, представляющий выражение возведения в степень двух выражений.
+class OperationPow : public ExpressionImpl {
+public:
+    // Создание выражения для деления на основе подвыражений.
+    OperationPow(Expression left, Expression right);
+
+    virtual ~OperationPow() override = default;
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
