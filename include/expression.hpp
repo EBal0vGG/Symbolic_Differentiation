@@ -45,6 +45,11 @@ public:
     Expression& operator/=(const Expression &other);
     Expression& operator^=(const Expression &other);
 
+    Expression sin();
+    Expression cos();
+    Expression ln();
+    Expression exp();
+
     // Операции с выражениями.
     Value_t eval(std::map<std::string, Value_t> context) const;
     std::string to_string() const;
@@ -111,7 +116,7 @@ private:
 // Класс, представляющий выражение вычитания двух выражений.
 class OperationSub : public ExpressionImpl {
 public:
-    // Создание выражения для суммы на основе подвыражений.
+    // Создание выражения для вычитания на основе подвыражений.
     OperationSub(Expression left, Expression right);
 
     virtual ~OperationSub() override = default;
@@ -128,7 +133,7 @@ private:
 // Класс, представляющий выражение умножения двух выражений.
 class OperationMul : public ExpressionImpl {
 public:
-    // Создание выражения для суммы на основе подвыражений.
+    // Создание выражения для уможения на основе подвыражений.
     OperationMul(Expression left, Expression right);
 
     virtual ~OperationMul() override = default;
@@ -162,7 +167,7 @@ private:
 // Класс, представляющий выражение возведения в степень двух выражений.
 class OperationPow : public ExpressionImpl {
 public:
-    // Создание выражения для деления на основе подвыражений.
+    // Создание выражения для возведения в степень на основе подвыражений.
     OperationPow(Expression left, Expression right);
 
     virtual ~OperationPow() override = default;
@@ -174,6 +179,70 @@ public:
 private:
     Expression left_;
     Expression right_;
+};
+
+// Класс, представляющий выражение взятия синуса.
+class OperationSin : public ExpressionImpl {
+public:
+    // Создание выражения для взятия синуса на основе подвыражения.
+    OperationSin(Expression agrument);
+
+    virtual ~OperationSin() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression argument_;
+};
+
+// Класс, представляющий выражение взятия косинуса.
+class OperationCos : public ExpressionImpl {
+public:
+    // Создание выражения для взятия косинуса на основе подвыражения.
+    OperationCos(Expression agrument);
+
+    virtual ~OperationCos() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression argument_;
+};
+
+// Класс, представляющий выражение взятия натурального логарифма.
+class OperationLn : public ExpressionImpl {
+public:
+    // Создание выражения для взятия логарифма на основе подвыражения.
+    OperationLn(Expression agrument);
+
+    virtual ~OperationLn() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression argument_;
+};
+
+// Класс, представляющий степенную функцию от экспоненты.
+class OperationExp : public ExpressionImpl {
+public:
+    // Создание выражения для взятия степенной функции от экспоненты.
+    OperationExp(Expression agrument);
+
+    virtual ~OperationExp() override = default;
+
+    // Реализация интерфейса ExpressionImpl.
+    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::string to_string() const override;
+
+private:
+    Expression argument_;
 };
 
 #endif // HEADER_GUARD_EXPRESSION_HPP_INCLUDED

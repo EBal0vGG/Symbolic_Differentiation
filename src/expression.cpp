@@ -55,6 +55,32 @@ Expression& Expression::operator/=(const Expression &other) {
     return *this;
 }
 
+Expression Expression::operator^(const Expression &other) {
+    return Expression(std::make_shared<OperationPow>(*this, other));
+}
+
+Expression& Expression::operator^=(const Expression &other) {
+    *this = *this ^ other;
+
+    return *this;
+}
+
+Expression Expression::sin() {
+    return Expression(std::make_shared<OperationSin>(*this));
+}
+
+Expression Expression::cos() {
+    return Expression(std::make_shared<OperationCos>(*this));
+}
+
+Expression Expression::ln() {
+    return Expression(std::make_shared<OperationLn>(*this));
+}
+
+Expression Expression::exp() {
+    return Expression(std::make_shared<OperationExp>(*this));
+}
+
 Expression operator""_val(Value_t val) {
     return Expression(std::make_shared<Value>(val));
 }
@@ -235,4 +261,76 @@ std::string OperationPow::to_string() const {
     return std::string("(")   + left_.to_string()  + std::string(")") +
            std::string(" ^ ") +
            std::string("(")   + right_.to_string() + std::string(")");
+}
+
+//====================//
+// Класс OperationSin //
+//====================//
+
+OperationSin::OperationSin(Expression argument) :
+    argument_(argument)
+{}
+
+Value_t OperationSin::eval(std::map<std::string, Value_t> context) const {
+    Value_t value  = argument_.eval(context);
+
+    return sinl(value);
+}
+
+std::string OperationSin::to_string() const {
+    return "sin(" + argument_.to_string() + ")";
+}
+
+//====================//
+// Класс OperationCos //
+//====================//
+
+OperationCos::OperationCos(Expression argument) :
+    argument_(argument)
+{}
+
+Value_t OperationCos::eval(std::map<std::string, Value_t> context) const {
+    Value_t value  = argument_.eval(context);
+
+    return cosl(value);
+}
+
+std::string OperationCos::to_string() const {
+    return "cos(" + argument_.to_string() + ")";
+}
+
+//====================//
+// Класс OperationLn  //
+//====================//
+
+OperationLn::OperationLn(Expression argument) :
+    argument_(argument)
+{}
+
+Value_t OperationLn::eval(std::map<std::string, Value_t> context) const {
+    Value_t value  = argument_.eval(context);
+
+    return logl(value);
+}
+
+std::string OperationLn::to_string() const {
+    return "ln(" + argument_.to_string() + ")";
+}
+
+//====================//
+// Класс OperationExp //
+//====================//
+
+OperationExp::OperationExp(Expression argument) :
+    argument_(argument)
+{}
+
+Value_t OperationExp::eval(std::map<std::string, Value_t> context) const {
+    Value_t value  = argument_.eval(context);
+
+    return expl(value);
+}
+
+std::string OperationExp::to_string() const {
+    return "exp(" + argument_.to_string() + ")";
 }
