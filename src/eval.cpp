@@ -31,14 +31,25 @@ int main(int argc, char **argv) {
         {"x", 2.0}, {"y", 3.0}
     };
 
+    Expression expr3 = 100.0_val - "x"_var * 2.0_val / 3.0_val + ("y"_var ^ 2.0_val);
+
+    std::map<std::string, Value_t> context3 = {
+        {"x", 100.0}
+    };
+
     // Вычисляем выражение в различных контекстах.
     printf("EVAL[%s]{x = %.1Lf, y = %.1Lf} = %Lf\n", expr1.to_string().c_str(), x, y, expr1.eval(input_context));
 
-    printf("EVAL[%s]{x = 1.0, y = 2.0} = %Lf\n", expr1.to_string().c_str(), expr1.eval(context1));
-    printf("EVAL[%s]{x = 2.0, y = 3.0} = %Lf\n", expr1.to_string().c_str(), expr1.eval(context2));
+    printf("EVAL[%s]{x = %.1Lf, y = %.1Lf} = %Lf\n",
+            expr1.to_string().c_str(), context1["x"], context1["y"], expr1.eval(context1));
+    printf("EVAL[%s]{x = %.1Lf, y = %.1Lf} = %Lf\n",
+            expr1.to_string().c_str(), context2["x"], context2["y"], expr1.eval(context2));
     printf("\n");
 
-    printf("EVAL[%s]{x = %.1Lf, y = %.1Lf} = %Lf\n", expr2.to_string().c_str(), x, y, expr2.eval(input_context));
+    printf("EVAL[%s] = %Lf\n", expr2.to_string().c_str(), expr2.eval(input_context));
+    printf("\n");
+
+    printf("SUBSTITUTE[%s]{x = %.1Lf} = %s\n", expr3.to_string().c_str(), context3["x"], expr3.substitute(context3).to_string().c_str());
 
     return EXIT_SUCCESS;
 }

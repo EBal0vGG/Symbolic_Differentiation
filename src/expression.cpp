@@ -99,6 +99,10 @@ Value_t Expression::eval(std::map<std::string, Value_t> context) const {
     return impl_->eval(context);
 }
 
+Expression Expression::substitute(std::map<std::string, Value_t> context) const {
+    return Expression(impl_->substitute(context));
+}
+
 std::string Expression::to_string() const {
     return impl_->to_string();
 }
@@ -119,6 +123,13 @@ Value_t Value::eval(std::map<std::string, Value_t> context) const {
     return value_;
 }
 
+std::shared_ptr<ExpressionImpl> Value::substitute(std::map<std::string, Value_t> context) const {
+    (void) context;
+
+    return std::make_shared<Value>(Value(value_));
+}
+
+
 std::string Value::to_string() const {
     return std::to_string(value_);
 }
@@ -135,12 +146,22 @@ Variable::Variable(std::string name) :
 Value_t Variable::eval(std::map<std::string, Value_t> context) const {
     auto iter = context.find(name_);
 
-    if (iter == context.end())
-    {
+    if (iter == context.end()) {
         throw std::runtime_error("Variable \"" + name_ + "\" not present in evaluation context");
     }
 
     return iter->second;
+}
+
+std::shared_ptr<ExpressionImpl> Variable::substitute(std::map<std::string, Value_t> context) const {
+
+    auto iter = context.find(name_);
+
+    if (iter != context.end()) {
+        return std::make_shared<Value>(Value(iter->second));
+    }
+
+    return std::make_shared<Variable>(Variable(name_));
 }
 
 std::string Variable::to_string() const {
@@ -161,6 +182,12 @@ Value_t OperationAdd::eval(std::map<std::string, Value_t> context) const {
     Value_t value_right = right_.eval(context);
 
     return value_left + value_right;
+}
+
+std::shared_ptr<ExpressionImpl> OperationAdd::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationAdd> (
+           OperationAdd(left_.substitute(context), right_.substitute(context))
+           );
 }
 
 std::string OperationAdd::to_string() const {
@@ -185,6 +212,12 @@ Value_t OperationSub::eval(std::map<std::string, Value_t> context) const {
     return value_left - value_right;
 }
 
+std::shared_ptr<ExpressionImpl> OperationSub::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationSub> (
+           OperationSub(left_.substitute(context), right_.substitute(context))
+           );
+}
+
 std::string OperationSub::to_string() const {
     return std::string("(")   + left_.to_string()  +
            std::string(" - ") + right_.to_string() +
@@ -207,6 +240,12 @@ Value_t OperationMul::eval(std::map<std::string, Value_t> context) const {
     return value_left * value_right;
 }
 
+std::shared_ptr<ExpressionImpl> OperationMul::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationMul> (
+           OperationMul(left_.substitute(context), right_.substitute(context))
+           );
+}
+
 std::string OperationMul::to_string() const {
     return std::string("(")   + left_.to_string()  + std::string(")") +
            std::string(" * ") +
@@ -227,6 +266,12 @@ Value_t OperationDiv::eval(std::map<std::string, Value_t> context) const {
     Value_t value_right = right_.eval(context);
 
     return value_left / value_right;
+}
+
+std::shared_ptr<ExpressionImpl> OperationDiv::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationDiv> (
+           OperationDiv(left_.substitute(context), right_.substitute(context))
+           );
 }
 
 std::string OperationDiv::to_string() const {
@@ -257,6 +302,12 @@ Value_t OperationPow::eval(std::map<std::string, Value_t> context) const {
     }
 }
 
+std::shared_ptr<ExpressionImpl> OperationPow::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationPow> (
+           OperationPow(left_.substitute(context), right_.substitute(context))
+           );
+}
+
 std::string OperationPow::to_string() const {
     return std::string("(")   + left_.to_string()  + std::string(")") +
            std::string(" ^ ") +
@@ -277,6 +328,12 @@ Value_t OperationSin::eval(std::map<std::string, Value_t> context) const {
     return sinl(value);
 }
 
+std::shared_ptr<ExpressionImpl> OperationSin::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationSin> (
+           OperationSin(argument_.substitute(context))
+           );
+}
+
 std::string OperationSin::to_string() const {
     return "sin(" + argument_.to_string() + ")";
 }
@@ -293,6 +350,12 @@ Value_t OperationCos::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
     return cosl(value);
+}
+
+std::shared_ptr<ExpressionImpl> OperationCos::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationCos> (
+           OperationCos(argument_.substitute(context))
+           );
 }
 
 std::string OperationCos::to_string() const {
@@ -313,6 +376,12 @@ Value_t OperationLn::eval(std::map<std::string, Value_t> context) const {
     return logl(value);
 }
 
+std::shared_ptr<ExpressionImpl> OperationLn::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationLn> (
+           OperationLn(argument_.substitute(context))
+           );
+}
+
 std::string OperationLn::to_string() const {
     return "ln(" + argument_.to_string() + ")";
 }
@@ -329,6 +398,12 @@ Value_t OperationExp::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
     return expl(value);
+}
+
+std::shared_ptr<ExpressionImpl> OperationExp::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationExp> (
+           OperationExp(argument_.substitute(context))
+           );
 }
 
 std::string OperationExp::to_string() const {

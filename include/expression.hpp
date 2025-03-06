@@ -18,6 +18,9 @@ public:
     // Функция вычисления результата выражения.
     virtual Value_t eval(std::map<std::string, Value_t> context) const = 0;
 
+    // Функция подстановки значений в вырежение.
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const = 0;
+
     // Функция преобразования выражения в строку.
     virtual std::string to_string() const = 0;
 };
@@ -52,6 +55,7 @@ public:
 
     // Операции с выражениями.
     Value_t eval(std::map<std::string, Value_t> context) const;
+    Expression substitute(std::map<std::string, Value_t> context) const;
     std::string to_string() const;
 
 private:
@@ -74,6 +78,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -90,6 +95,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -106,6 +112,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -123,6 +130,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -140,6 +148,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -157,6 +166,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -174,6 +184,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -191,6 +202,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -207,6 +219,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -223,6 +236,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -239,6 +253,7 @@ public:
 
     // Реализация интерфейса ExpressionImpl.
     virtual Value_t eval(std::map<std::string, Value_t> context) const override;
+    virtual std::shared_ptr<ExpressionImpl> substitute(std::map<std::string, Value_t> context) const override;
     virtual std::string to_string() const override;
 
 private:
