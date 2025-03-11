@@ -2,148 +2,189 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <complex>
 
 //==================//
 // Класс Expression //
 //==================//
 
-Expression::Expression(std::shared_ptr<ExpressionImpl> impl) :
+template <typename Value_t>
+Expression<Value_t>::Expression(std::shared_ptr<ExpressionImpl<Value_t>> impl) :
     impl_ (impl)
 {}
 
-Expression::Expression(std::string variable) :
-    impl_ (std::make_shared<Variable>(variable))
+template <typename Value_t>
+Expression<Value_t>::Expression(std::string variable) :
+    impl_ (std::make_shared<Variable<Value_t>>(variable))
 {}
 
-Expression Expression::operator+(const Expression &other) {
-    return Expression(std::make_shared<OperationAdd>(*this, other));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::operator+(const Expression<Value_t> &other) {
+    return Expression<Value_t>(std::make_shared<OperationAdd<Value_t>>(*this, other));
 }
 
-Expression& Expression::operator+=(const Expression &other) {
+template <typename Value_t>
+Expression<Value_t> &Expression<Value_t>::operator+=(const Expression<Value_t> &other) {
     *this = *this + other;
 
     return *this;
 }
 
-Expression Expression::operator-(const Expression &other) {
-    return Expression(std::make_shared<OperationSub>(*this, other));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::operator-(const Expression<Value_t> &other) {
+    return Expression<Value_t>(std::make_shared<OperationSub<Value_t>>(*this, other));
 }
 
-Expression& Expression::operator-=(const Expression &other) {
+template <typename Value_t>
+Expression<Value_t> &Expression<Value_t>::operator-=(const Expression<Value_t> &other) {
     *this = *this - other;
 
     return *this;
 }
 
-Expression Expression::operator*(const Expression &other) {
-    return Expression(std::make_shared<OperationMul>(*this, other));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::operator*(const Expression<Value_t> &other) {
+    return Expression<Value_t>(std::make_shared<OperationMul<Value_t>>(*this, other));
 }
 
-Expression& Expression::operator*=(const Expression &other) {
+template <typename Value_t>
+Expression<Value_t> &Expression<Value_t>::operator*=(const Expression<Value_t> &other) {
     *this = *this * other;
 
     return *this;
 }
 
-Expression Expression::operator/(const Expression &other) {
-    return Expression(std::make_shared<OperationDiv>(*this, other));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::operator/(const Expression<Value_t> &other) {
+    return Expression<Value_t>(std::make_shared<OperationDiv<Value_t>>(*this, other));
 }
 
-Expression& Expression::operator/=(const Expression &other) {
+template <typename Value_t>
+Expression<Value_t> &Expression<Value_t>::operator/=(const Expression<Value_t> &other) {
     *this = *this * other;
 
     return *this;
 }
 
-Expression Expression::operator^(const Expression &other) {
-    return Expression(std::make_shared<OperationPow>(*this, other));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::operator^(const Expression<Value_t> &other) {
+    return Expression<Value_t>(std::make_shared<OperationPow<Value_t>>(*this, other));
 }
 
-Expression& Expression::operator^=(const Expression &other) {
+template <typename Value_t>
+Expression<Value_t>& Expression<Value_t>::operator^=(const Expression<Value_t> &other) {
     *this = *this ^ other;
 
     return *this;
 }
 
-Expression Expression::sin() {
-    return Expression(std::make_shared<OperationSin>(*this));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::sin() {
+    return Expression<Value_t>(std::make_shared<OperationSin<Value_t>>(*this));
 }
 
-Expression Expression::cos() {
-    return Expression(std::make_shared<OperationCos>(*this));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::cos() {
+    return Expression<Value_t>(std::make_shared<OperationCos<Value_t>>(*this));
 }
 
-Expression Expression::ln() {
-    return Expression(std::make_shared<OperationLn>(*this));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::ln() {
+    return Expression<Value_t>(std::make_shared<OperationLn<Value_t>>(*this));
 }
 
-Expression Expression::exp() {
-    return Expression(std::make_shared<OperationExp>(*this));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::exp() {
+    return Expression<Value_t>(std::make_shared<OperationExp<Value_t>>(*this));
 }
 
-Expression operator""_val(Value_t val) {
-    return Expression(std::make_shared<Value>(val));
-}
-
-Expression operator""_var(const char *name) {
-    return Expression(std::make_shared<Variable>(std::string(name)));
-}
-
-Expression operator""_var(const char *name, size_t size) {
-    (void) size;
-
-    return Expression(std::make_shared<Variable>(std::string(name)));
-}
-
-Value_t Expression::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t Expression<Value_t>::eval(std::map<std::string, Value_t> context) const {
     return impl_->eval(context);
 }
 
-Expression Expression::substitute(std::map<std::string, Value_t> context) const {
-    return Expression(impl_->substitute(context));
+template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return Expression<Value_t>(impl_->substitute(context));
 }
 
-std::string Expression::to_string() const {
+template <typename Value_t>
+std::string Expression<Value_t>::to_string() const {
     return impl_->to_string();
 }
+
+
+// Определения дружественных функций.
+template <typename T>
+Expression<T> make_val(T val) {
+    return Expression<T>(std::make_shared<Value<T>>(val));
+}
+
+template <typename T>
+Expression<T> make_var(const char* var) {
+    return Expression<T>(std::make_shared<Variable<T>>(std::string(var)));
+}
+
+// Explicit instantiation for required types
+template Expression<long double> make_val(long double);
+template Expression<std::complex<long double>> make_val(std::complex<long double>);
+
+template Expression<long double> make_var(const char*);
+template Expression<std::complex<long double>> make_var(const char*);
+
+template class Expression<long double>;
+template class Expression<std::complex<long double>>;
 
 //=============//
 // Класс Value //
 //=============//
 
-Value::Value(Value_t value) :
+template <typename Value_t>
+Value<Value_t>::Value(Value_t value) :
     value_ (value)
 {}
 
 // Реализация интерфейса ExpressionImpl.
-Value_t Value::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t Value<Value_t>::eval(std::map<std::string, Value_t> context) const {
     // Отмечаем контекст вычисления как неиспользуемый.
     (void) context;
 
     return value_;
 }
 
-std::shared_ptr<ExpressionImpl> Value::substitute(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> Value<Value_t>::substitute(std::map<std::string, Value_t> context) const {
     (void) context;
 
-    return std::make_shared<Value>(Value(value_));
+    return std::make_shared<Value<Value_t>>(Value<Value_t>(value_));
 }
 
-
-std::string Value::to_string() const {
+template <typename Value_t>
+std::string Value<Value_t>::to_string() const {
     return std::to_string(value_);
 }
+
+template <>
+std::string Value<std::complex<long double>>::to_string(void) const {
+    return "Complex shit";
+}
+
+template class Value<long double>;
+template class Value<std::complex<long double>>;
 
 //================//
 // Класс Variable //
 //================//
 
-Variable::Variable(std::string name) :
+template <typename Value_t>
+Variable<Value_t>::Variable(std::string name) :
     name_ (name)
 {}
 
 // Реализация интерфейса ExpressionImpl.
-Value_t Variable::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t Variable<Value_t>::eval(std::map<std::string, Value_t> context) const {
     auto iter = context.find(name_);
 
     if (iter == context.end()) {
@@ -153,259 +194,321 @@ Value_t Variable::eval(std::map<std::string, Value_t> context) const {
     return iter->second;
 }
 
-std::shared_ptr<ExpressionImpl> Variable::substitute(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> Variable<Value_t>::substitute(std::map<std::string, Value_t> context) const {
 
     auto iter = context.find(name_);
 
     if (iter != context.end()) {
-        return std::make_shared<Value>(Value(iter->second));
+        return std::make_shared<Value<Value_t>>(Value<Value_t>(iter->second));
     }
 
-    return std::make_shared<Variable>(Variable(name_));
+    return std::make_shared<Variable<Value_t>>(Variable<Value_t>(name_));
 }
 
-std::string Variable::to_string() const {
+template <typename Value_t>
+std::string Variable<Value_t>::to_string() const {
     return name_;
 }
+
+template class Variable<long double>;
+template class Variable<std::complex<long double>>;
 
 //====================//
 // Класс OperationAdd //
 //====================//
 
-OperationAdd::OperationAdd(Expression left, Expression right) :
+template <typename Value_t>
+OperationAdd<Value_t>::OperationAdd(Expression<Value_t> left, Expression<Value_t> right) :
     left_  (left),
     right_ (right)
 {}
 
-Value_t OperationAdd::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationAdd<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value_left  = left_.eval(context);
     Value_t value_right = right_.eval(context);
 
     return value_left + value_right;
 }
 
-std::shared_ptr<ExpressionImpl> OperationAdd::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationAdd> (
-           OperationAdd(left_.substitute(context), right_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationAdd<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationAdd<Value_t>> (
+           OperationAdd<Value_t>(left_.substitute(context), right_.substitute(context))
            );
 }
 
-std::string OperationAdd::to_string() const {
+template <typename Value_t>
+std::string OperationAdd<Value_t>::to_string() const {
     return std::string("(")   + left_.to_string()  +
            std::string(" + ") + right_.to_string() +
            std::string(")");
 }
 
+template class OperationAdd<long double>;
+template class OperationAdd<std::complex<long double>>;
+
 //====================//
 // Класс OperationSub //
 //====================//
 
-OperationSub::OperationSub(Expression left, Expression right) :
+template <typename Value_t>
+OperationSub<Value_t>::OperationSub(Expression<Value_t> left, Expression<Value_t> right) :
     left_  (left),
     right_ (right)
 {}
 
-Value_t OperationSub::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationSub<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value_left  = left_.eval(context);
     Value_t value_right = right_.eval(context);
 
     return value_left - value_right;
 }
 
-std::shared_ptr<ExpressionImpl> OperationSub::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationSub> (
-           OperationSub(left_.substitute(context), right_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationSub<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationSub<Value_t>> (
+           OperationSub<Value_t>(left_.substitute(context), right_.substitute(context))
            );
 }
 
-std::string OperationSub::to_string() const {
+template <typename Value_t>
+std::string OperationSub<Value_t>::to_string() const {
     return std::string("(")   + left_.to_string()  +
            std::string(" - ") + right_.to_string() +
            std::string(")");
 }
 
+template class OperationSub<long double>;
+template class OperationSub<std::complex<long double>>;
+
 //====================//
 // Класс OperationMul //
 //====================//
 
-OperationMul::OperationMul(Expression left, Expression right) :
+template <typename Value_t>
+OperationMul<Value_t>::OperationMul(Expression<Value_t> left, Expression<Value_t> right) :
     left_  (left),
     right_ (right)
 {}
 
-Value_t OperationMul::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationMul<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value_left  = left_.eval(context);
     Value_t value_right = right_.eval(context);
 
     return value_left * value_right;
 }
 
-std::shared_ptr<ExpressionImpl> OperationMul::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationMul> (
-           OperationMul(left_.substitute(context), right_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationMul<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationMul<Value_t>> (
+           OperationMul<Value_t>(left_.substitute(context), right_.substitute(context))
            );
 }
 
-std::string OperationMul::to_string() const {
+template <typename Value_t>
+std::string OperationMul<Value_t>::to_string() const {
     return std::string("(")   + left_.to_string()  + std::string(")") +
            std::string(" * ") +
            std::string("(")   + right_.to_string() + std::string(")");
 }
 
+template class OperationMul<long double>;
+template class OperationMul<std::complex<long double>>;
+
 //====================//
 // Класс OperationDiv //
 //====================//
 
-OperationDiv::OperationDiv(Expression left, Expression right) :
+template <typename Value_t>
+OperationDiv<Value_t>::OperationDiv(Expression<Value_t> left, Expression<Value_t> right) :
     left_  (left),
     right_ (right)
 {}
 
-Value_t OperationDiv::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationDiv<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value_left  = left_.eval(context);
     Value_t value_right = right_.eval(context);
 
     return value_left / value_right;
 }
 
-std::shared_ptr<ExpressionImpl> OperationDiv::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationDiv> (
-           OperationDiv(left_.substitute(context), right_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationDiv<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationDiv<Value_t>> (
+           OperationDiv<Value_t>(left_.substitute(context), right_.substitute(context))
            );
 }
 
-std::string OperationDiv::to_string() const {
+template <typename Value_t>
+std::string OperationDiv<Value_t>::to_string() const {
 return std::string("(")   + left_.to_string()  + std::string(")") +
        std::string(" / ") +
        std::string("(")   + right_.to_string() + std::string(")");
 }
 
+template class OperationDiv<long double>;
+template class OperationDiv<std::complex<long double>>;
+
 //====================//
 // Класс OperationPow //
 //====================//
 
-OperationPow::OperationPow(Expression left, Expression right) :
+template <typename Value_t>
+OperationPow<Value_t>::OperationPow(Expression<Value_t> left, Expression<Value_t> right) :
     left_  (left),
     right_ (right)
 {}
 
-Value_t OperationPow::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationPow<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value_left  = left_.eval(context);
     Value_t value_right = right_.eval(context);
 
-    try {
-        return powl(value_left, value_right);
-    } catch (const std::exception &e) {
-        throw std::runtime_error("Error in powl: " + std::string(e.what())       +
-                                 " (Left: "        + std::to_string(value_left)  +
-                                 ", Right: "       + std::to_string(value_right) + ")");
-    }
+    return pow(value_left, value_right);
 }
 
-std::shared_ptr<ExpressionImpl> OperationPow::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationPow> (
-           OperationPow(left_.substitute(context), right_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationPow<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationPow<Value_t>> (
+           OperationPow<Value_t>(left_.substitute(context), right_.substitute(context))
            );
 }
 
-std::string OperationPow::to_string() const {
+template <typename Value_t>
+std::string OperationPow<Value_t>::to_string() const {
     return std::string("(")   + left_.to_string()  + std::string(")") +
            std::string(" ^ ") +
            std::string("(")   + right_.to_string() + std::string(")");
 }
 
+template class OperationPow<long double>;
+template class OperationPow<std::complex<long double>>;
+
 //====================//
 // Класс OperationSin //
 //====================//
 
-OperationSin::OperationSin(Expression argument) :
+template <typename Value_t>
+OperationSin<Value_t>::OperationSin(Expression<Value_t> argument) :
     argument_(argument)
 {}
 
-Value_t OperationSin::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationSin<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
-    return sinl(value);
+    return sin(value);
 }
 
-std::shared_ptr<ExpressionImpl> OperationSin::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationSin> (
-           OperationSin(argument_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationSin<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationSin<Value_t>> (
+           OperationSin<Value_t>(argument_.substitute(context))
            );
 }
 
-std::string OperationSin::to_string() const {
+template <typename Value_t>
+std::string OperationSin<Value_t>::to_string() const {
     return "sin(" + argument_.to_string() + ")";
 }
+
+template class OperationSin<long double>;
+template class OperationSin<std::complex<long double>>;
 
 //====================//
 // Класс OperationCos //
 //====================//
 
-OperationCos::OperationCos(Expression argument) :
+template <typename Value_t>
+OperationCos<Value_t>::OperationCos(Expression<Value_t> argument) :
     argument_(argument)
 {}
 
-Value_t OperationCos::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationCos<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
-    return cosl(value);
+    return cos(value);
 }
 
-std::shared_ptr<ExpressionImpl> OperationCos::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationCos> (
-           OperationCos(argument_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationCos<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationCos<Value_t>> (
+           OperationCos<Value_t>(argument_.substitute(context))
            );
 }
 
-std::string OperationCos::to_string() const {
+template <typename Value_t>
+std::string OperationCos<Value_t>::to_string() const {
     return "cos(" + argument_.to_string() + ")";
 }
+
+template class OperationCos<long double>;
+template class OperationCos<std::complex<long double>>;
 
 //====================//
 // Класс OperationLn  //
 //====================//
 
-OperationLn::OperationLn(Expression argument) :
+template <typename Value_t>
+OperationLn<Value_t>::OperationLn(Expression<Value_t> argument) :
     argument_(argument)
 {}
 
-Value_t OperationLn::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationLn<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
-    return logl(value);
+    return log(value);
 }
 
-std::shared_ptr<ExpressionImpl> OperationLn::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationLn> (
-           OperationLn(argument_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationLn<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationLn<Value_t>> (
+           OperationLn<Value_t>(argument_.substitute(context))
            );
 }
 
-std::string OperationLn::to_string() const {
+template <typename Value_t>
+std::string OperationLn<Value_t>::to_string() const {
     return "ln(" + argument_.to_string() + ")";
 }
+
+template class OperationLn<long double>;
+template class OperationLn<std::complex<long double>>;
 
 //====================//
 // Класс OperationExp //
 //====================//
 
-OperationExp::OperationExp(Expression argument) :
+template <typename Value_t>
+OperationExp<Value_t>::OperationExp(Expression<Value_t> argument) :
     argument_(argument)
 {}
 
-Value_t OperationExp::eval(std::map<std::string, Value_t> context) const {
+template <typename Value_t>
+Value_t OperationExp<Value_t>::eval(std::map<std::string, Value_t> context) const {
     Value_t value  = argument_.eval(context);
 
-    return expl(value);
+    return exp(value);
 }
 
-std::shared_ptr<ExpressionImpl> OperationExp::substitute(std::map<std::string, Value_t> context) const {
-    return std::make_shared<OperationExp> (
-           OperationExp(argument_.substitute(context))
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationExp<Value_t>::substitute(std::map<std::string, Value_t> context) const {
+    return std::make_shared<OperationExp<Value_t>> (
+           OperationExp<Value_t>(argument_.substitute(context))
            );
 }
 
-std::string OperationExp::to_string() const {
+template <typename Value_t>
+std::string OperationExp<Value_t>::to_string() const {
     return "exp(" + argument_.to_string() + ")";
 }
+
+template class OperationExp<long double>;
+template class OperationExp<std::complex<long double>>;

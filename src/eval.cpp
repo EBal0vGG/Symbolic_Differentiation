@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstring>
 
+typedef long double Value_t;
+
 int main(int argc, char **argv) {
     if (argc != 5 || std::strcmp(argv[1], "--x") != 0 || std::strcmp(argv[3], "--y") != 0) {
         printf("Usage: eval --x <x value> --y <y value>\n");
@@ -17,10 +19,10 @@ int main(int argc, char **argv) {
     };
 
     // Создаём объект выражения на основе механизма синтаксического соответствия.
-    Expression expr1 = 100.0_val - "x"_var * 2.0_val / 3.0_val + ("x"_var ^ 2.0_val);
-    expr1 += "y"_var * "x"_var + "x"_var.sin();
+    Expression expr1 = make_val<Value_t>(100.0) - make_var<Value_t>("x") * make_val<Value_t>(2.0) / make_val<Value_t>(3.0) + (make_var<Value_t>("x") ^ make_val<Value_t>(2.0));
+    expr1 += make_var<Value_t>("y") * make_var<Value_t>("x") + make_var<Value_t>("x").sin();
 
-    Expression expr2 = ((2.0_val).exp()).ln();
+    Expression expr2 = (make_val<long double>(2.0).exp()).ln();
 
     // Задаём контексты для вычисления выражений.
     std::map<std::string, Value_t> context1 = {
@@ -31,7 +33,7 @@ int main(int argc, char **argv) {
         {"x", 2.0}, {"y", 3.0}
     };
 
-    Expression expr3 = 100.0_val - "x"_var * 2.0_val / 3.0_val + ("y"_var ^ 2.0_val);
+    Expression expr3 = make_val<Value_t>(100.0) - make_var<Value_t>("x") * make_val<Value_t>(2.0) / make_val<Value_t>(3.0) + (make_var<Value_t>("y") ^ make_val<Value_t>(2.0));
 
     std::map<std::string, Value_t> context3 = {
         {"x", 100.0}
