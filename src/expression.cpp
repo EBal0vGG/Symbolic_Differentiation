@@ -19,6 +19,11 @@ Expression<Value_t>::Expression(std::string variable) :
 {}
 
 template <typename Value_t>
+Expression<Value_t>::Expression(Value_t val) :
+    impl_ (std::make_shared<Value<Value_t>>(val))
+{}
+
+template <typename Value_t>
 Expression<Value_t> Expression<Value_t>::operator+(const Expression<Value_t> &other) {
     return Expression<Value_t>(std::make_shared<OperationAdd<Value_t>>(*this, other));
 }
@@ -61,7 +66,7 @@ Expression<Value_t> Expression<Value_t>::operator/(const Expression<Value_t> &ot
 
 template <typename Value_t>
 Expression<Value_t> &Expression<Value_t>::operator/=(const Expression<Value_t> &other) {
-    *this = *this * other;
+    *this = *this / other;
 
     return *this;
 }
@@ -113,24 +118,23 @@ std::string Expression<Value_t>::to_string() const {
     return impl_->to_string();
 }
 
-
 // Определения дружественных функций.
 template <typename T>
-Expression<T> make_val(T val) {
+Expression<T> m_val(T val) {
     return Expression<T>(std::make_shared<Value<T>>(val));
 }
 
 template <typename T>
-Expression<T> make_var(const char* var) {
+Expression<T> m_var(const char* var) {
     return Expression<T>(std::make_shared<Variable<T>>(std::string(var)));
 }
 
 // Explicit instantiation for required types
-template Expression<long double> make_val(long double);
-template Expression<std::complex<long double>> make_val(std::complex<long double>);
+template Expression<long double> m_val(long double);
+template Expression<std::complex<long double>> m_val(std::complex<long double>);
 
-template Expression<long double> make_var(const char*);
-template Expression<std::complex<long double>> make_var(const char*);
+template Expression<long double> m_var(const char*);
+template Expression<std::complex<long double>> m_var(const char*);
 
 template class Expression<long double>;
 template class Expression<std::complex<long double>>;
@@ -311,9 +315,9 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationMul<Value_t>::substitute(std::
 
 template <typename Value_t>
 std::string OperationMul<Value_t>::to_string() const {
-    return std::string("(")   + left_.to_string()  + std::string(")") +
-           std::string(" * ") +
-           std::string("(")   + right_.to_string() + std::string(")");
+    return std::string("(")   + left_.to_string()  +
+           std::string(" * ") + right_.to_string() +
+           std::string(")");
 }
 
 template class OperationMul<long double>;
@@ -346,9 +350,9 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationDiv<Value_t>::substitute(std::
 
 template <typename Value_t>
 std::string OperationDiv<Value_t>::to_string() const {
-return std::string("(")   + left_.to_string()  + std::string(")") +
-       std::string(" / ") +
-       std::string("(")   + right_.to_string() + std::string(")");
+    return std::string("(")   + left_.to_string()  +
+           std::string(" / ") + right_.to_string() +
+           std::string(")");
 }
 
 template class OperationDiv<long double>;
@@ -381,9 +385,9 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationPow<Value_t>::substitute(std::
 
 template <typename Value_t>
 std::string OperationPow<Value_t>::to_string() const {
-    return std::string("(")   + left_.to_string()  + std::string(")") +
-           std::string(" ^ ") +
-           std::string("(")   + right_.to_string() + std::string(")");
+    return std::string("(")   + left_.to_string()  +
+           std::string(" ^ ") + right_.to_string() +
+           std::string(")");
 }
 
 template class OperationPow<long double>;

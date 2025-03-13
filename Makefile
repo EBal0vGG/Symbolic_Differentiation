@@ -5,12 +5,13 @@
 CXX = g++
 
 CXXFLAGS =     \
-	-std=c++17 \
+	-std=c++20 \
 	-Wall      \
 	-Wextra    \
 	-Werror
 
 LDFLAGS =
+EVAL =
 
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -g
@@ -35,13 +36,17 @@ RESET   = \033[0m
 #-------
 
 INCLUDES = \
-	include/expression.hpp
+	include/expression.hpp \
+	include/lexer.hpp \
+	include/parser.hpp
 
 CXXFLAGS += -I $(abspath include)
 
 SOURCES = \
 	src/eval.cpp \
-	src/expression.cpp
+	src/expression.cpp \
+	src/lexer.cpp \
+	src/parser.cpp
 
 OBJECTS = $(SOURCES:src/%.cpp=build/%.o)
 
@@ -69,7 +74,7 @@ build/%.o: src/%.cpp $(INCLUDES)
 run: $(EXECUTABLE)
 	@printf "$(BYELLOW)Running executable$(RESET)\n"
 	@mkdir -p res
-	@./$(EXECUTABLE) --x 2.0 --y 1.0
+	@./$(EXECUTABLE) --eval "$(EVAL)"
 
 clean:
 	@printf "$(BYELLOW)Cleaning build and resource directories$(RESET)\n"

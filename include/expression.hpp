@@ -31,12 +31,13 @@ template <typename Value_t> class Expression {
 public:
     // Создание выражений.
     Expression(std::string variable);
+    Expression(Value_t val);
 
     template <typename T>
-    friend Expression<T> make_val(T val);
+    friend Expression<T> m_val(T val);
 
     template <typename T>
-    friend Expression<T> make_var(const char *var);
+    friend Expression<T> m_var(const char *var);
 
     // Конструирование выражений на основе других выражений.
     Expression  operator+ (const Expression &other);
@@ -69,10 +70,10 @@ private:
 
 // Определения дружественных функций.
 template <typename T>
-Expression<T> make_val(T val);
+Expression<T> m_val(T val);
 
 template <typename T>
-Expression<T> make_var(const char* var);
+Expression<T> m_var(const char* var);
 
 // Класс, представляющий число в рамках выражения.
 template <typename Value_t> class Value : public ExpressionImpl<Value_t> {
