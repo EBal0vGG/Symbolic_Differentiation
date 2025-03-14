@@ -24,8 +24,20 @@ Token Lexer::getNextToken() {
     char currentChar = peek();
 
     if (isalpha(currentChar) || currentChar == '_') {
-        // Лексический разбор имени переменной.
-        return getVariable();
+        // Обработка случая, что встречена функция.
+        if (currentChar == 's' || currentChar == 'c' || currentChar == 'l' || currentChar == 'e') {
+            // Лексический разбор функции.
+            try {
+                return getFunction();
+            }
+            catch (const std::runtime_error&) {
+                // Лексический разбор имени переменной при неудаче.
+                return getVariable();
+            }
+        }
+        else {
+            return getVariable();
+        }
     }
     else if (isdigit(currentChar)) {
         // Лексический разбор числового значения.
@@ -138,6 +150,13 @@ void Lexer::skipSpaceSequence() {
 
     skipTokenByPattern(spacePattern);
 }
+
+Token Lexer::getFunction() {
+    static const std::regex variablePattern{REGEXP_FUNCTION};
+
+    return getTokenByPattern(variablePattern, TOK_FUNCTION);
+}
+
 
 Token Lexer::getVariable() {
     static const std::regex variablePattern{REGEXP_VARIABLE};

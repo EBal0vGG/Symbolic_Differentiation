@@ -23,15 +23,18 @@ enum TokenType {
     TOK_DIVIDE = 6,
     // Операция '^'.
     TOK_POWER = 7,
+    // Функция.
+    TOK_FUNCTION = 8,
     // Левая и правая круглые скобки.
-    TOK_BRACKET_LEFT  = 8,
-    TOK_BRACKET_RIGHT = 9,
+    TOK_BRACKET_LEFT  = 9,
+    TOK_BRACKET_RIGHT = 10,
     // Конец файла.
-    TOK_EOF = 10
+    TOK_EOF = 11
 };
 
 // Таблица регулярных выражений для типов лексем.
 constexpr const char* REGEXP_SPACE_SEQUENCE = "[ \t]+";
+constexpr const char* REGEXP_FUNCTION       = "(sin|cos|ln|exp)(?=\\s*\\([^)]*\\))";
 constexpr const char* REGEXP_VARIABLE       = "[a-zA-Z_]+";
 constexpr const char* REGEXP_VALUE          = "(\\+|-)?(0|[1-9][0-9]*)(\\.[0-9]+)?";
 
@@ -84,6 +87,8 @@ private:
 
     // Пропуск последовательности пробельных символов.
     void skipSpaceSequence();
+    // Считывание функции.
+    Token getFunction();
     // Считывание переменной.
     Token getVariable();
     // Считывание числового значения.
