@@ -22,6 +22,7 @@
 //          | Power
 //
 // Power  ::= ( Expr )
+//          | Func
 //          | Value
 //          | Variable
 

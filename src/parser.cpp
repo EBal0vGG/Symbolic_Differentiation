@@ -145,6 +145,25 @@ Expression<Value_t> Parser<Value_t>::parsePower() {
 #ifndef NDEBUG
     std::cout << "Power" << std::endl;
 #endif
+    if (match(TOK_FUNCTION)) {
+        std::string funcName = previousToken_.lexeme;
+
+        expect({TOK_BRACKET_LEFT});
+
+        Expression<Value_t> expr = parseExpr();
+
+        expect({TOK_BRACKET_RIGHT});
+
+        if (funcName == "sin")
+            return expr.sin();
+        if (funcName == "cos")
+            return expr.cos();
+        if (funcName == "ln")
+            return expr.ln();
+        if (funcName == "exp")
+            return expr.exp();
+    }
+
     if (match(TOK_BRACKET_LEFT)) {
         Expression<Value_t> expr = parseExpr();
 
