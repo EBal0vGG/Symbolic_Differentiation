@@ -119,6 +119,7 @@ Expression<Value_t> Parser<Value_t>::parseTerm() {
 
     return term;
 }
+
 template <typename Value_t>
 Expression<Value_t> Parser<Value_t>::parseFactor() {
 #ifndef NDEBUG

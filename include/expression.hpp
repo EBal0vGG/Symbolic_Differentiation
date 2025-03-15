@@ -17,10 +17,13 @@ public:
     virtual ~ExpressionImpl() = default;
 
     // Функция вычисления результата выражения.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const = 0;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const = 0;
+
+    // Взятие производной по переменной.
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const = 0;
 
     // Функция подстановки значений в вырежение.
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const = 0;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const = 0;
 
     // Функция преобразования выражения в строку.
     virtual std::string to_string() const = 0;
@@ -30,7 +33,7 @@ public:
 template <typename Value_t> class Expression {
 public:
     // Создание выражений.
-    Expression(std::string variable);
+    Expression(const std::string &variable);
     Expression(Value_t val);
 
     template <typename T>
@@ -57,8 +60,9 @@ public:
     Expression exp();
 
     // Операции с выражениями.
-    Value_t eval(std::map<std::string, Value_t> context) const;
-    Expression substitute(std::map<std::string, Value_t> context) const;
+    Value_t eval(std::map<std::string, Value_t> &context) const;
+    Expression diff(const std::string &by) const;
+    Expression substitute(std::map<std::string, Value_t> &context) const;
     std::string to_string() const;
 
 private:
@@ -66,7 +70,6 @@ private:
 
     std::shared_ptr<ExpressionImpl<Value_t>> impl_;
 };
-
 
 // Определения дружественных функций.
 template <typename T>
@@ -84,8 +87,9 @@ public:
     virtual ~Value() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -96,13 +100,14 @@ private:
 template <typename Value_t> class Variable : public ExpressionImpl<Value_t> {
 public:
     // Создание переменной на основе её имени.
-    Variable(std::string name);
+    Variable(const std::string &name);
 
     virtual ~Variable() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
@@ -113,158 +118,172 @@ private:
 template <typename Value_t> class OperationAdd : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для суммы на основе подвыражений.
-    OperationAdd(Expression<Value_t> left, Expression<Value_t> right);
+    OperationAdd(const std::shared_ptr<ExpressionImpl<Value_t>> &left,
+                 const std::shared_ptr<ExpressionImpl<Value_t>> &right);
 
     virtual ~OperationAdd() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> left_;
-    Expression<Value_t> right_;
+    std::shared_ptr<ExpressionImpl<Value_t>> left_;
+    std::shared_ptr<ExpressionImpl<Value_t>> right_;
 };
 
 // Класс, представляющий выражение вычитания двух выражений.
 template <typename Value_t> class OperationSub : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для вычитания на основе подвыражений.
-    OperationSub(Expression<Value_t> left, Expression<Value_t> right);
+    OperationSub(const std::shared_ptr<ExpressionImpl<Value_t>> &left,
+                 const std::shared_ptr<ExpressionImpl<Value_t>> &right);
 
     virtual ~OperationSub() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> left_;
-    Expression<Value_t> right_;
+    std::shared_ptr<ExpressionImpl<Value_t>> left_;
+    std::shared_ptr<ExpressionImpl<Value_t>> right_;
 };
 
 // Класс, представляющий выражение умножения двух выражений.
 template <typename Value_t> class OperationMul : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для уможения на основе подвыражений.
-    OperationMul(Expression<Value_t> left, Expression<Value_t> right);
+    OperationMul(const std::shared_ptr<ExpressionImpl<Value_t>> &left,
+                 const std::shared_ptr<ExpressionImpl<Value_t>> &right);
 
     virtual ~OperationMul() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> left_;
-    Expression<Value_t> right_;
+    std::shared_ptr<ExpressionImpl<Value_t>> left_;
+    std::shared_ptr<ExpressionImpl<Value_t>> right_;
 };
 
 // Класс, представляющий выражение деления двух выражений.
 template <typename Value_t> class OperationDiv : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для деления на основе подвыражений.
-    OperationDiv(Expression<Value_t> left, Expression<Value_t> right);
+    OperationDiv(const std::shared_ptr<ExpressionImpl<Value_t>> &left,
+                 const std::shared_ptr<ExpressionImpl<Value_t>> &right);
 
     virtual ~OperationDiv() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> left_;
-    Expression<Value_t> right_;
+    std::shared_ptr<ExpressionImpl<Value_t>> left_;
+    std::shared_ptr<ExpressionImpl<Value_t>> right_;
 };
 
 // Класс, представляющий выражение возведения в степень двух выражений.
 template <typename Value_t> class OperationPow : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для возведения в степень на основе подвыражений.
-    OperationPow(Expression<Value_t> left, Expression<Value_t> right);
+    OperationPow(const std::shared_ptr<ExpressionImpl<Value_t>> &left,
+                 const std::shared_ptr<ExpressionImpl<Value_t>> &right);
 
     virtual ~OperationPow() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> left_;
-    Expression<Value_t> right_;
+    std::shared_ptr<ExpressionImpl<Value_t>> left_;
+    std::shared_ptr<ExpressionImpl<Value_t>> right_;
 };
 
 // Класс, представляющий выражение взятия синуса.
 template <typename Value_t> class OperationSin : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для взятия синуса на основе подвыражения.
-    OperationSin(Expression<Value_t> agrument);
+    OperationSin(const std::shared_ptr<ExpressionImpl<Value_t>> &agrument);
 
     virtual ~OperationSin() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> argument_;
+    std::shared_ptr<ExpressionImpl<Value_t>> argument_;
 };
 
 // Класс, представляющий выражение взятия косинуса.
 template <typename Value_t> class OperationCos : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для взятия косинуса на основе подвыражения.
-    OperationCos(Expression<Value_t> agrument);
+    OperationCos(const std::shared_ptr<ExpressionImpl<Value_t>> &agrument);
 
     virtual ~OperationCos() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> argument_;
+    std::shared_ptr<ExpressionImpl<Value_t>> argument_;
 };
 
 // Класс, представляющий выражение взятия натурального логарифма.
 template <typename Value_t> class OperationLn : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для взятия логарифма на основе подвыражения.
-    OperationLn(Expression<Value_t> agrument);
+    OperationLn(const std::shared_ptr<ExpressionImpl<Value_t>> &agrument);
 
     virtual ~OperationLn() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> argument_;
+    std::shared_ptr<ExpressionImpl<Value_t>> argument_;
 };
 
 // Класс, представляющий степенную функцию от экспоненты.
 template <typename Value_t> class OperationExp : public ExpressionImpl<Value_t> {
 public:
     // Создание выражения для взятия степенной функции от экспоненты.
-    OperationExp(Expression<Value_t> agrument);
+    OperationExp(const std::shared_ptr<ExpressionImpl<Value_t>> &agrument);
 
     virtual ~OperationExp() override = default;
 
     // Реализация интерфейса ExpressionImpl.
-    virtual Value_t eval(std::map<std::string, Value_t> context) const override;
-    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> context) const override;
+    virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
     virtual std::string to_string() const override;
 
 private:
-    Expression<Value_t> argument_;
+    std::shared_ptr<ExpressionImpl<Value_t>> argument_;
 };
 
 #endif // HEADER_GUARD_EXPRESSION_HPP_INCLUDED

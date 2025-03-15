@@ -16,8 +16,8 @@ EVAL =
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -g
 else
-	CXXFLAGS  += -flto -DNDEBUG
-	LXXDFLAGS += -flto
+	CXXFLAGS  += -flto=auto -DNDEBUG
+	LDFLAGS   += -flto=auto -fuse-linker-plugin
 endif
 
 #-------
