@@ -25,6 +25,9 @@ public:
     // Функция подстановки значений в вырежение.
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const = 0;
 
+    // Функция преобразование выражение в упрощенное.
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const = 0;
+
     // Функция преобразования выражения в строку.
     virtual std::string to_string() const = 0;
 };
@@ -63,6 +66,7 @@ public:
     Value_t eval(std::map<std::string, Value_t> &context) const;
     Expression diff(const std::string &by) const;
     Expression substitute(std::map<std::string, Value_t> &context) const;
+    Expression prettify() const;
     std::string to_string() const;
 
 private:
@@ -90,6 +94,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -108,6 +113,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -127,6 +133,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -147,6 +154,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -167,6 +175,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -187,6 +196,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -207,6 +217,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -226,6 +237,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -244,6 +256,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -262,6 +275,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:
@@ -280,6 +294,7 @@ public:
     virtual Value_t eval(std::map<std::string, Value_t> &context) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> diff(const std::string &by) const override;
     virtual std::shared_ptr<ExpressionImpl<Value_t>> substitute(std::map<std::string, Value_t> &context) const override;
+    virtual std::shared_ptr<ExpressionImpl<Value_t>> prettify() const override;
     virtual std::string to_string() const override;
 
 private:

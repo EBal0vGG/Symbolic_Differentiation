@@ -1,4 +1,5 @@
 #include <expression.hpp>
+#include <utils.hpp>
 
 #include <stdexcept>
 #include <cmath>
@@ -119,6 +120,11 @@ Expression<Value_t> Expression<Value_t>::substitute(std::map<std::string, Value_
 }
 
 template <typename Value_t>
+Expression<Value_t> Expression<Value_t>::prettify() const {
+    return Expression<Value_t>(impl_->prettify());
+}
+
+template <typename Value_t>
 std::string Expression<Value_t>::to_string() const {
     return impl_->to_string();
 }
@@ -177,6 +183,11 @@ std::shared_ptr<ExpressionImpl<Value_t>> Value<Value_t>::substitute(std::map<std
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> Value<Value_t>::prettify() const {
+    return std::make_shared<Value<Value_t>>(value_);
+}
+
+template <typename Value_t>
 std::string Value<Value_t>::to_string() const {
     return std::to_string(value_);
 }
@@ -231,6 +242,11 @@ std::shared_ptr<ExpressionImpl<Value_t>> Variable<Value_t>::substitute(std::map<
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> Variable<Value_t>::prettify() const {
+    return std::make_shared<Variable<Value_t>>(name_);
+}
+
+template <typename Value_t>
 std::string Variable<Value_t>::to_string() const {
     return name_;
 }
@@ -267,6 +283,23 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationAdd<Value_t>::substitute(std::
     return std::make_shared<OperationAdd<Value_t>> (
         left_->substitute(context), right_->substitute(context)
     );
+}
+
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationAdd<Value_t>::prettify() const {
+    auto new_left  = left_->prettify();
+    auto new_right = right_->prettify();
+
+    if (is_zero(new_left)) return new_right;
+    if (is_zero(new_right)) return new_left;
+    if (is_val(new_left) && is_val(new_right)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(
+            new_left->eval(emptyContext) + new_right->eval(emptyContext)
+        );
+    }
+    return std::make_shared<OperationAdd<Value_t>>(new_left, new_right);
 }
 
 template <typename Value_t>
@@ -311,6 +344,23 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationSub<Value_t>::substitute(std::
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationSub<Value_t>::prettify() const {
+    auto new_left  = left_->prettify();
+    auto new_right = right_->prettify();
+
+    if (is_zero(new_right)) return new_left;
+    if (is_val(new_left) && is_val(new_right)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(
+            new_left->eval(emptyContext) - new_right->eval(emptyContext)
+        );
+    }
+
+    return std::make_shared<OperationSub<Value_t>>(new_left, new_right);
+}
+
+template <typename Value_t>
 std::string OperationSub<Value_t>::to_string() const {
     return std::string("(")   + left_->to_string()  +
            std::string(" - ") + right_->to_string() +
@@ -352,6 +402,26 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationMul<Value_t>::substitute(std::
     return std::make_shared<OperationMul<Value_t>> (
         left_->substitute(context), right_->substitute(context)
     );
+}
+
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationMul<Value_t>::prettify() const {
+    auto new_left  = left_->prettify();
+    auto new_right = right_->prettify();
+
+    if (is_one(new_left)) return new_right;
+    if (is_one(new_right)) return new_left;
+    if (is_zero(new_left) || is_zero(new_right))
+        return std::make_shared<Value<Value_t>>(0.0);
+    if (is_val(new_left) && is_val(new_right)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(
+            new_left->eval(emptyContext) * new_right->eval(emptyContext)
+        );
+    }
+
+    return std::make_shared<OperationMul<Value_t>>(new_left, new_right);
 }
 
 template <typename Value_t>
@@ -403,6 +473,24 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationDiv<Value_t>::substitute(std::
     return std::make_shared<OperationDiv<Value_t>> (
         left_->substitute(context), right_->substitute(context)
     );
+}
+
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationDiv<Value_t>::prettify() const {
+    auto new_left  = left_->prettify();
+    auto new_right = right_->prettify();
+
+    if (is_one(new_right)) return new_left;
+    if (is_zero(new_left)) return std::make_shared<Value<Value_t>>(0.0);
+    if (is_val(new_left) && is_val(new_right)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(
+            new_left->eval(emptyContext) / new_right->eval(emptyContext)
+        );
+    }
+
+    return std::make_shared<OperationDiv<Value_t>>(new_left, new_right);
 }
 
 template <typename Value_t>
@@ -465,6 +553,26 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationPow<Value_t>::substitute(std::
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationPow<Value_t>::prettify() const {
+    auto new_left = left_->prettify();
+    auto new_right = right_->prettify();
+
+    if (is_zero(new_left)) return std::make_shared<Value<Value_t>>(0.0L);
+    if (is_zero(new_right) || is_one(new_left))
+        return std::make_shared<Value<Value_t>>(1.0);
+    if (is_one(new_right)) return new_left;
+    if (is_val(new_left) && is_val(new_right)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(
+            pow(new_left->eval(emptyContext), new_right->eval(emptyContext))
+        );
+    }
+
+    return std::make_shared<OperationPow<Value_t>>(new_left, new_right);
+}
+
+template <typename Value_t>
 std::string OperationPow<Value_t>::to_string() const {
     return std::string("(")   + left_->to_string()  +
            std::string(" ^ ") + right_->to_string() +
@@ -499,6 +607,18 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationSin<Value_t>::diff(const std::
 template <typename Value_t>
 std::shared_ptr<ExpressionImpl<Value_t>> OperationSin<Value_t>::substitute(std::map<std::string, Value_t> &context) const {
     return std::make_shared<OperationSin<Value_t>>(argument_->substitute(context));
+}
+
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationSin<Value_t>::prettify() const {
+    auto new_arg = argument_->prettify();
+
+    if (is_val(new_arg)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(sin(new_arg->eval(emptyContext)));
+    }
+    return std::make_shared<OperationSin<Value_t>>(new_arg);
 }
 
 template <typename Value_t>
@@ -541,6 +661,18 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationCos<Value_t>::substitute(std::
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationCos<Value_t>::prettify() const {
+    auto new_arg = argument_->prettify();
+
+    if (is_val(new_arg)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(cos(new_arg->eval(emptyContext)));
+    }
+    return std::make_shared<OperationCos<Value_t>>(new_arg);
+}
+
+template <typename Value_t>
 std::string OperationCos<Value_t>::to_string() const {
     return "cos(" + argument_->to_string() + ")";
 }
@@ -580,6 +712,18 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationLn<Value_t>::substitute(std::m
 }
 
 template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationLn<Value_t>::prettify() const {
+    auto new_arg = argument_->prettify();
+
+    if (is_val(new_arg)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(log(new_arg->eval(emptyContext)));
+    }
+    return std::make_shared<OperationLn<Value_t>>(new_arg);
+}
+
+template <typename Value_t>
 std::string OperationLn<Value_t>::to_string() const {
     return "ln(" + argument_->to_string() + ")";
 }
@@ -612,6 +756,18 @@ std::shared_ptr<ExpressionImpl<Value_t>> OperationExp<Value_t>::diff(const std::
 template <typename Value_t>
 std::shared_ptr<ExpressionImpl<Value_t>> OperationExp<Value_t>::substitute(std::map<std::string, Value_t> &context) const {
     return std::make_shared<OperationExp<Value_t>>(argument_->substitute(context));
+}
+
+template <typename Value_t>
+std::shared_ptr<ExpressionImpl<Value_t>> OperationExp<Value_t>::prettify() const {
+    auto new_arg = argument_->prettify();
+
+    if (is_val(new_arg)) {
+        std::map<std::string, Value_t> emptyContext;
+
+        return std::make_shared<Value<Value_t>>(exp(new_arg->eval(emptyContext)));
+    }
+    return std::make_shared<OperationExp<Value_t>>(new_arg);
 }
 
 template <typename Value_t>

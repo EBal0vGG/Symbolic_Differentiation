@@ -36,6 +36,7 @@ RESET   = \033[0m
 #-------
 
 INCLUDES = \
+	include/utils.hpp \
 	include/expression.hpp \
 	include/lexer.hpp \
 	include/parser.hpp

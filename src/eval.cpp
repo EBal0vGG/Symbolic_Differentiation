@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
     printf("EVAL[%s]{x = %.2Lf, y = %.2Lf} = %Lf\n", expr.to_string().c_str(), context1["x"], context1["y"], expr.eval(context1));
     printf("EVAL[%s]{x = %.2Lf, y = %.2Lf} = %Lf\n", expr.to_string().c_str(), context2["x"], context2["y"], expr.eval(context2));
     printf("DIFF[%s] = [%s]\n", expr.to_string().c_str(), expr.diff("x").to_string().c_str());
+    printf("DIFF[%s] = [%s]\n", expr.to_string().c_str(), expr.diff("x").prettify().to_string().c_str());
 
     return EXIT_SUCCESS;
 }
