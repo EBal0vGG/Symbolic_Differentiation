@@ -6,9 +6,6 @@
 #include <memory>
 #include <complex>
 
-// Тип, параметризующий класс выражение.
-// typedef long double Value_t;
-
 // Абстрактный класс, задающий интерфейс между выражением и его реализацией.
 template <typename Value_t> class ExpressionImpl {
 public:

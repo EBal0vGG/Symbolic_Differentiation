@@ -51,7 +51,7 @@ SOURCES = \
 
 OBJECTS = $(SOURCES:src/%.cpp=build/%.o)
 
-EXECUTABLE = build/eval
+EXECUTABLE = build/differentiator
 
 #----------------
 # Процесс сборки
@@ -72,14 +72,17 @@ build/%.o: src/%.cpp $(INCLUDES)
 # Вспомогательные цели
 #----------------------
 
-run: $(EXECUTABLE)
-	@printf "$(BYELLOW)Running executable$(RESET)\n"
-	@mkdir -p res
-	@./$(EXECUTABLE) --eval "$(EVAL)"
+eval:
+	@printf "$(BYELLOW)Running in eval mode$(RESET)\n"
+	@./$(EXECUTABLE) --eval "$(expression)" $(variables)
+
+diff:
+	@printf "$(BYELLOW)Running in diff mode$(RESET)\n"
+	@./$(EXECUTABLE) --diff "$(expression)" --by $(variable)
 
 clean:
 	@printf "$(BYELLOW)Cleaning build and resource directories$(RESET)\n"
 	rm -rf res
 	rm -rf build
 
-.PHONY: run clean default
+.PHONY: run clean default eval diff

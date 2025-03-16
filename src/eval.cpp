@@ -2,45 +2,63 @@
 
 #include <string>
 #include <cstring>
+#include <map>
+#include <iostream>
+#include <sstream>
 
 #include <lexer.hpp>
 #include <parser.hpp>
 
 typedef long double Value_t;
 
+std::map<std::string, Value_t> parseVariables(int argc, char* argv[], int startIndex) {
+    std::map<std::string, Value_t> context;
+    for (int i = startIndex; i < argc; i++) {
+        std::string arg = argv[i];
+        size_t equalsPos = arg.find('=');
+        if (equalsPos != std::string::npos) {
+            std::string var = arg.substr(0, equalsPos);
+            Value_t value = std::stold(arg.substr(equalsPos + 1));
+            context[var] = value;
+        }
+    }
+    return context;
+}
+
 int main(int argc, char* argv[])
 {
-    if (argc != 3 || std::strcmp(argv[1], "--eval") != 0)
-    {
-        printf("Usage: eval --eval <expression>\n");
+    if (argc < 3) {
+        std::cerr << "Usage: differentiator --eval <expression> [var=value ...]\n";
+        std::cerr << "       differentiator --diff <expression> --by <variable>\n";
         return EXIT_FAILURE;
     }
 
-    // Создаём лексический анализатор для разбора выражения.
-    Lexer lexer{std::string(argv[2])};
+    if (std::strcmp(argv[1], "--eval") == 0) {
+        Lexer lexer{std::string(argv[2])};
+        Parser<Value_t> parser{lexer};
+        Expression expr = parser.parseExpression();
 
-    // Создаём парсер для выражения.
-    Parser<Value_t> parser{lexer};
+        std::map<std::string, Value_t> context = parseVariables(argc, argv, 3);
 
-    // Создаём выражение на основе строки.
-    Expression expr = parser.parseExpression();
+        Value_t result = expr.eval(context);
+        std::cout << result << std::endl;
+    }
+    else if (std::strcmp(argv[1], "--diff") == 0 && argc >= 5 && std::strcmp(argv[3], "--by") == 0) {
+        Lexer lexer{std::string(argv[2])};
+        Parser<Value_t> parser{lexer};
+        Expression expr = parser.parseExpression();
 
-    // Задаём контексты для вычисления выражений.
-    std::map<std::string, Value_t> context1 =
-    {
-        {"x", 1.0}, {"y", 2.0}
-    };
+        std::string variable = argv[4];
+        Expression diffExpr = expr.diff(variable);
 
-    std::map<std::string, Value_t> context2 =
-    {
-        {"x", 2.0}, {"y", 3.0}
-    };
-
-    // Вычисляем выражение, созданное на основе строки, в разных контекстах.
-    printf("EVAL[%s]{x = %.2Lf, y = %.2Lf} = %Lf\n", expr.to_string().c_str(), context1["x"], context1["y"], expr.eval(context1));
-    printf("EVAL[%s]{x = %.2Lf, y = %.2Lf} = %Lf\n", expr.to_string().c_str(), context2["x"], context2["y"], expr.eval(context2));
-    printf("DIFF[%s] = [%s]\n", expr.to_string().c_str(), expr.diff("x").to_string().c_str());
-    printf("DIFF[%s] = [%s]\n", expr.to_string().c_str(), expr.diff("x").prettify().to_string().c_str());
+        std::cout << diffExpr.prettify().to_string() << std::endl;
+    }
+    else {
+        std::cerr << "Invalid arguments.\n";
+        std::cerr << "Usage: differentiator --eval <expression> [var=value ...]\n";
+        std::cerr << "       differentiator --diff <expression> --by <variable>\n";
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
