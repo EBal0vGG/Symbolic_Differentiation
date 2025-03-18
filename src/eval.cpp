@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
 
         std::map<std::string, Value_t> context = parseVariables(argc, argv, 3);
 
-        Value_t result = expr.eval(context);
-        std::cout << result << std::endl;
+        printf("EVAL[%s] = %Lf\n", expr.to_string().c_str(), expr.eval(context));
+
     }
     else if (std::strcmp(argv[1], "--diff") == 0 && argc >= 5 && std::strcmp(argv[3], "--by") == 0) {
         Lexer lexer{std::string(argv[2])};
@@ -51,7 +51,8 @@ int main(int argc, char* argv[])
         std::string variable = argv[4];
         Expression diffExpr = expr.diff(variable);
 
-        std::cout << diffExpr.prettify().to_string() << std::endl;
+        printf("DIFF[%s] = [%s]\n", expr.to_string().c_str(), diffExpr.prettify().to_string().c_str());
+
     }
     else {
         std::cerr << "Invalid arguments.\n";
