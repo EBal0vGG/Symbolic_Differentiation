@@ -13,6 +13,9 @@ CXXFLAGS =     \
 LDFLAGS =
 EVAL =
 
+GTFLAGS=-lgtest -lgtest_main -lpthread
+PATH_TO_GTEST=/wsl.localhost/Ubuntu/usr
+
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -g
 else
@@ -47,11 +50,16 @@ SOURCES = \
 	src/eval.cpp \
 	src/expression.cpp \
 	src/lexer.cpp \
-	src/parser.cpp
+	src/parser.cpp \
+	src/test_lib.cpp
 
 OBJECTS = $(SOURCES:src/%.cpp=build/%.o)
 
+EX_OBJECTS = $(filter-out build/test_lib.o, $(OBJECTS))
+TEST_OBJECTS = $(filter-out build/eval.o, $(OBJECTS))
+
 EXECUTABLE = build/differentiator
+TESTS = build/tests
 
 #----------------
 # Процесс сборки
@@ -59,9 +67,13 @@ EXECUTABLE = build/differentiator
 
 default: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): $(EX_OBJECTS)
 	@printf "$(BYELLOW)Linking executable $(BCYAN)$@$(RESET)\n"
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CXX) $(LDFLAGS) $(EX_OBJECTS) -o $@
+
+$(TESTS): $(TEST_OBJECTS)
+	@printf "$(BYELLOW)Linking executable $(BCYAN)$@$(RESET)\n"
+	$(CXX) $(LDFLAGS) $(TEST_OBJECTS) -o $@ $(GTFLAGS)
 
 build/%.o: src/%.cpp $(INCLUDES)
 	@printf "$(BYELLOW)Building object file $(BCYAN)$@$(RESET)\n"
@@ -72,13 +84,17 @@ build/%.o: src/%.cpp $(INCLUDES)
 # Вспомогательные цели
 #----------------------
 
-eval:
+eval: $(EXECUTABLE)
 	@printf "$(BYELLOW)Running in eval mode$(RESET)\n"
 	@./$(EXECUTABLE) --eval "$(expression)" $(variables)
 
-diff:
+diff: $(EXECUTABLE)
 	@printf "$(BYELLOW)Running in diff mode$(RESET)\n"
 	@./$(EXECUTABLE) --diff "$(expression)" --by $(variable)
+
+test: $(TESTS)
+	@printf "$(BYELLOW)Testing functions$(RESET)\n"
+	@./$(TESTS)
 
 clean:
 	@printf "$(BYELLOW)Cleaning build and resource directories$(RESET)\n"

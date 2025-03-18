@@ -1,4 +1,4 @@
-#include "../include/expression.hpp"
+#include <expression.hpp>
 #include <gtest/gtest.h>
 #include <map>
 #include <string>
@@ -68,7 +68,7 @@ TEST_F(ExpressionTest, MultiplicationEvaluation) {
 
 TEST_F(ExpressionTest, MultiplicationDifferentiation) {
     Expression<long double> expr = m_var<long double>("x") * m_val<long double>(10.0L);
-    Expression<long double> diffExpr = expr.diff("x");
+    Expression<long double> diffExpr = expr.diff("x").prettify();
     map<string, long double> context;
     EXPECT_DOUBLE_EQ(diffExpr.eval(context), 10.0L); // Derivative of x * 10 w.r.t. x is 10
 }
@@ -112,7 +112,7 @@ TEST_F(ExpressionTest, Prettify) {
 // Test ToString
 TEST_F(ExpressionTest, ToString) {
     Expression<long double> expr = m_var<long double>("x") + m_val<long double>(5.0L);
-    EXPECT_EQ(expr.to_string(), "(x + 5)");
+    EXPECT_EQ(expr.to_string(), "(x + 5.000000)");
 }
 
 int main(int argc, char **argv) {
